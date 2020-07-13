@@ -1,0 +1,8 @@
+<launch>
+    <!-- loading home map with map server-->
+    <arg name="map_home"  default="$(find turtlebot_ekf_localization)/map/home.yaml"/>
+
+
+    <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_home)">
+    </node>
+</launch>

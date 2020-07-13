@@ -1,0 +1,13 @@
+<launch>
+    <include file="$(find turtlebot_ekf_localization)/launch/map_launcher.launch"></include>
+
+
+    <node name="turtlebot_ekf_localization_node" pkg="turtlebot_ekf_localization" type="turtlebot_ekf_localization" output="screen">
+        <param name="intialPoseX" value="0.0"/>
+        <param name="intialPoseY" value="0.0"/>
+        <param name="intialPoseTheta" value="0.0"/>
+        <param name="initialCovarianceMatrix" value="0.05 0.0 0.0
+                                                     0.0 0.05 0.0 
+                                                     0.0 0.0 0.06"/>
+    </node>
+</launch>
