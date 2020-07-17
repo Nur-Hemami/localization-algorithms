@@ -52,28 +52,24 @@ void TurtlebotDataHandler::lidarCallback(const sensor_msgs::LaserScan::ConstPtr&
 }
 
 void TurtlebotDataHandler::velocityCallback(const geometry_msgs::Twist::ConstPtr& vel){
-    if((vel->linear.x != 0 || vel->angular.z != 0) && moving_ == false){
-        startMoving_ = ros::Time::now();
-        moving_ = true;
-        linearVelocity_ = vel->linear.x;
-        angularVelocity_ = vel->angular.z;
+    velocity_[0] = vel->linear.x;
+    velocity_[1] = vel->angular.z;
+    if(!firstTime_){
+        time_ = newTime_;
     }
-    if((vel->linear.x == 0 && vel->angular.z == 0) && moving_ == true){
-        stopMoving_ = ros::Time::now();
-        
-        
-        
-        /*double secs = stopMoving_.toSec() - startMoving_.toSec();
-        
+    newTime_ = ros::Time::now();
+    firstTime_ = false;
 
-        distancex_ += (velocitySaved_.linear.x * secs * cos(distancetheta_));
-        distancey_ += (velocitySaved_.linear.x * secs * sin(distancetheta_));
-        distancetheta_ += (velocitySaved_.angular.z * secs);
 
-        ROS_INFO("Distance travelled in x: %f, y: %f, theta: %f", PoseVector_[0], PoseVector_[1], PoseVector_[2]);*/
-        moving_ = false;
-        movementReceived_ = true;
-    }
+    //TODO: Move this to EKF_prediction
+    double secs = newTime_.toSec() - time_.toSec();
+    
+    PoseVector_[2] += (velocity_[1] * secs);
+    PoseVector_[0] += (velocity_[0] * secs * cos(PoseVector_[2]));
+    PoseVector_[1] += (velocity_[0] * secs * sin(PoseVector_[2]));
+
+    ROS_INFO("Distance travelled in x: %f, y: %f, theta: %f", PoseVector_[0], PoseVector_[1], PoseVector_[2]);
+    
 }
 
 
@@ -94,5 +90,5 @@ sensor_msgs::LaserScan TurtlebotDataHandler::getLaser(){
 }
 
 std::vector<double> TurtlebotDataHandler::getVelocity(){
-    return velocitySaved_;
+    return velocity_;
 }

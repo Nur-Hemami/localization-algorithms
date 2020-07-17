@@ -26,21 +26,17 @@ class TurtlebotDataHandler{
         nav_msgs::OccupancyGrid mapSaved_;
         sensor_msgs::LaserScan laserSaved_;
 
+        bool firstTime_ = true;
 
-
-        bool moving_ = false;
-
-        std::vector<double> velocitySaved_;
-        double linearVelocity_;
-        double angularVelocity_;
+        std::vector<double> velocity_  = std::vector<double> (2); //velocity_[0] = v, velocity_[1] = w
 
     public:
         bool mapReceived_ = false;
         bool laserReceived_ = false;
         bool movementReceived_ = false;
 
-        ros::Time startMoving_;// = ros::Time::now();
-        ros::Time stopMoving_;
+        ros::Time time_;// = ros::Time::now();
+        ros::Time newTime_;
 
 
         TurtlebotDataHandler(const ros::NodeHandle &nh, const ros::NodeHandle &nhLocal);

@@ -32,7 +32,7 @@ void EKF_predition(TurtlebotDataHandler* dataForEKF){
     double v = u[0];
     double w = u[1];
 
-    double delta_t = dataForEKF->stopMoving_.toSec() - dataForEKF->startMoving_.toSec();
+    double delta_t = dataForEKF->newTime_.toSec() - dataForEKF->time_.toSec();
 
 
     Eigen::Matrix3d G;
@@ -52,6 +52,10 @@ void EKF_predition(TurtlebotDataHandler* dataForEKF){
 }
 
 
+void EKF_correction(TurtlebotDataHandler* dataForEKF){
+    //prototype function for the correction of the extended kalman filter
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "turtlebot_ekf_localization_node");
@@ -64,24 +68,22 @@ int main(int argc, char **argv)
     //Turtlebot object handles lidar, map information and Gaussian Pose with Covariance
     TurtlebotDataHandler TurtlebotDataHandler(nh, nhLocal);
 
-    std::cout << "Initial pose: " << TurtlebotDataHandler
-
     ros::Rate loop_rate(10);
-
+    TurtlebotDataHandler.time_ = ros::Time::now();
     while (ros::ok)
     {
         ros::spinOnce();
         loop_rate.sleep();
 
-        //First we wait to get the map from the topic. TODO: change it and load it directly from Turtlesbot persistent data.
+/*         //First we wait to get the map from the topic. TODO: change it and load it directly from Turtlesbot persistent data.
         if(TurtlebotDataHandler.mapReceived_){
             //Now, everytime we receive data from the laser, we call the function EKF_localization, this should be separated into two functions, prediction and measurement.
             if (TurtlebotDataHandler.movementReceived_){
                 EKF_predition(&TurtlebotDataHandler);
                 TurtlebotDataHandler.movementReceived_ = false;
             }
-        }
-        
+        } */
+        //std::cout << TurtlebotDataHandler.calculateDistance() << std::endl;
 
     }
 
