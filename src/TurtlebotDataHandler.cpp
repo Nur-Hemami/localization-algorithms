@@ -22,9 +22,9 @@ void TurtlebotDataHandler::init(){
     nhLocal_.getParam("intialPoseY", tempy);
     nhLocal_.getParam("intialPoseTheta", temptheta);
 
-    PoseVector_.push_back(tempx);
-    PoseVector_.push_back(tempy);
-    PoseVector_.push_back(temptheta);
+    PoseVector_(0) = tempx;
+    PoseVector_(1) = tempy;
+    PoseVector_(2) = temptheta;
 
     std::string covarianceTemp;
     nhLocal_.getParam("initialCovarianceMatrix", covarianceTemp);
@@ -64,22 +64,29 @@ void TurtlebotDataHandler::velocityCallback(const geometry_msgs::Twist::ConstPtr
     //TODO: Move this to EKF_prediction
     double secs = newTime_.toSec() - time_.toSec();
     
-    PoseVector_[2] += (velocity_[1] * secs);
+    /*PoseVector_[2] += (velocity_[1] * secs);
     PoseVector_[0] += (velocity_[0] * secs * cos(PoseVector_[2]));
-    PoseVector_[1] += (velocity_[0] * secs * sin(PoseVector_[2]));
-
-    ROS_INFO("Distance travelled in x: %f, y: %f, theta: %f", PoseVector_[0], PoseVector_[1], PoseVector_[2]);
-    
+    PoseVector_[1] += (velocity_[0] * secs * sin(PoseVector_[2]));*/
 }
 
 
-std::vector<double> TurtlebotDataHandler::getPose(){
+Eigen::Vector3d TurtlebotDataHandler::getPose(){
     return PoseVector_;
 }
 
 Eigen::Matrix3d TurtlebotDataHandler::getCovariance(){
     return Covariance_;
 }
+
+
+void TurtlebotDataHandler::setPose(Eigen::Vector3d mu_t){
+    PoseVector_ = mu_t;
+}
+
+void TurtlebotDataHandler::setCovariance(Eigen::Matrix3d sigma){
+    Covariance_ = sigma;
+}
+
 
 nav_msgs::OccupancyGrid TurtlebotDataHandler::getMap(){
     return mapSaved_;

@@ -20,7 +20,8 @@ class TurtlebotDataHandler{
         //ros::Publisher odom_;
 
         //Pose = [x, y, theta] (position, orientation)
-        std::vector<double> PoseVector_;
+        //std::vector<double> PoseVector_;
+        Eigen::Vector3d PoseVector_;
         Eigen::Matrix3d Covariance_;
 
         nav_msgs::OccupancyGrid mapSaved_;
@@ -51,7 +52,11 @@ class TurtlebotDataHandler{
 
         void velocityCallback(const geometry_msgs::Twist::ConstPtr& vel);
 
-        std::vector<double> getPose();
+        Eigen::Vector3d getPose();
+
+        void setPose(Eigen::Vector3d);
+
+        void setCovariance(Eigen::Matrix3d);
    
         Eigen::Matrix3d getCovariance();
 

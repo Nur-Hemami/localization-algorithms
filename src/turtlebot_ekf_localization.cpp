@@ -3,27 +3,24 @@
 
 
 void EKF_predition(TurtlebotDataHandler* dataForEKF){
-
     /*
     Input:
         mu = pose
         sigma = covariance
         u = control action (velocities[linear, angular])
-
     -------------------------------------------------------
     Local variables:
-        G = Jacobian Matrix of the noise-free motion model g
+        G_t = Jacobian Matrix of the noise-free motion model g with regards of the state (x, y , theta)
         delta_t = time taken in the control action
-        V
-        M
+        V_t = Jacobian Matrix of the velocity motion model g with regards of the control (v, w)
+        M_t = Covariance Matrix of noise in control space // Covariance matrix of process noise
     ---------------------------------------------------------
     Output:
-    //Update this values on dataForEKF, mu and sigma with setters
-        newSigma
-        newMu
+        Sigma_t
+        mu_t
     */
 
-    std::vector<double> mu = dataForEKF->getPose();
+    Eigen::Vector3d mu = dataForEKF->getPose();
     
     Eigen::Matrix3d sigma = dataForEKF->getCovariance();
 
@@ -35,20 +32,43 @@ void EKF_predition(TurtlebotDataHandler* dataForEKF){
     double delta_t = dataForEKF->newTime_.toSec() - dataForEKF->time_.toSec();
 
 
-    Eigen::Matrix3d G;
-    G(0,0) = 1;
-    G(0,1) = 0;
-    G(0,2) = (-v/w * cos(mu[2])) + (v/w * cos(mu[2] + (w * delta_t)));
-    G(1,0) = 0;
-    G(1,1) = 1;
-    G(1,2) = (-v/w * sin(mu[2])) + (v/w * sin(mu[2] + (w * delta_t)));
-    G(2,0) = 0;
-    G(2,1) = 1;
-    G(2,2) = 1;
+    Eigen::Matrix3d G_t;
+    G_t(0,0) = 1;
+    G_t(0,1) = 0;
+    G_t(0,2) = (-v * delta_t * sin(mu[2]));
+    G_t(1,0) = 0;
+    G_t(1,1) = 1;
+    G_t(1,2) = (v * delta_t * cos(mu[2]));
+    G_t(2,0) = 0;
+    G_t(2,1) = 0;
+    G_t(2,2) = 1;
+
+    Eigen::MatrixXd V_t(3,2);
+    V_t(0,0) = -delta_t * sin(mu[2]);
+    V_t(0,1) = 0;
+    V_t(1,0) = delta_t * cos(mu[2]);
+    V_t(1,1) = 0;
+    V_t(2,0) = 0;
+    V_t(2,1) = delta_t;
+
+    //TODO: Improve the covariance values of the process noise, check robot_localization/filter_base.cpp->processNoiseCovariance_
+    Eigen::Matrix2d M_t;
+    M_t(0,0) = 0.2;
+    M_t(0,1) = 0;
+    M_t(1,0) = 0;
+    M_t(1,1) = 0.2;
+
+    Eigen::Vector3d mu_t;
+    mu_t(2) = mu[2] + (w * delta_t);
+    mu_t(0) = mu[0] + (v * delta_t * cos(mu[2]));
+    mu_t(1) = mu[1] + (v * delta_t * sin(mu[2]));
+    
+    
+    Eigen::Matrix3d sigma_t = (G_t * sigma * G_t.transpose()) + (V_t * M_t * V_t.transpose());
 
 
-    std::cout << G << std::endl;
-
+    dataForEKF->setPose(mu_t);
+    dataForEKF->setCovariance(sigma_t);
 }
 
 
@@ -74,16 +94,10 @@ int main(int argc, char **argv)
     {
         ros::spinOnce();
         loop_rate.sleep();
-
-/*         //First we wait to get the map from the topic. TODO: change it and load it directly from Turtlesbot persistent data.
+         //First we wait to get the map from the topic. TODO: change it and load it directly from Turtlesbot persistent data.
         if(TurtlebotDataHandler.mapReceived_){
-            //Now, everytime we receive data from the laser, we call the function EKF_localization, this should be separated into two functions, prediction and measurement.
-            if (TurtlebotDataHandler.movementReceived_){
-                EKF_predition(&TurtlebotDataHandler);
-                TurtlebotDataHandler.movementReceived_ = false;
-            }
-        } */
-        //std::cout << TurtlebotDataHandler.calculateDistance() << std::endl;
+            EKF_predition(&TurtlebotDataHandler);
+        }
 
     }
 
