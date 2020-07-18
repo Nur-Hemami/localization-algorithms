@@ -66,7 +66,6 @@ void EKF_predition(TurtlebotDataHandler* dataForEKF){
     
     Eigen::Matrix3d sigma_t = (G_t * sigma * G_t.transpose()) + (V_t * M_t * V_t.transpose());
 
-
     dataForEKF->setPose(mu_t);
     dataForEKF->setCovariance(sigma_t);
 }
@@ -74,6 +73,36 @@ void EKF_predition(TurtlebotDataHandler* dataForEKF){
 
 void EKF_correction(TurtlebotDataHandler* dataForEKF){
     //prototype function for the correction of the extended kalman filter
+    /*
+    Input:
+        mu = pose
+        sigma = covariance
+        z = sensor reading (/scan)
+        map = saved map of the environment
+    -------------------------------------------------------
+    Local variables:
+        H_t = Jacobian Matrix of the noise-free measurement model h with regards of the state (x, y , theta)
+        Q_t = Covariance Matrix of measurement noise in control space // Covariance matrix of measurement noise
+        K_t = Kalman Gain
+    ---------------------------------------------------------
+    Output:
+        Sigma_t
+        mu_t
+    */
+    Eigen::Vector3d mu = dataForEKF->getPose();
+
+    Eigen::Matrix3d sigma = dataForEKF->getCovariance();
+
+    nav_msgs::OccupancyGrid map = dataForEKF->getMap();
+
+
+    Eigen::Vector3d mu_t;
+
+    Eigen::Matrix3d sigma_t;
+
+
+    dataForEKF->setPose(mu_t);
+    dataForEKF->setCovariance(sigma_t);
 }
 
 int main(int argc, char **argv)
@@ -85,7 +114,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     ros::NodeHandle nhLocal("~");
 
-    //Turtlebot object handles lidar, map information and Gaussian Pose with Covariance
+    //Turtlebot object handles lidar, map information, velocities and Gaussian Pose with Covariance
     TurtlebotDataHandler TurtlebotDataHandler(nh, nhLocal);
 
     ros::Rate loop_rate(10);

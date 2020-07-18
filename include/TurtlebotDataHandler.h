@@ -17,10 +17,6 @@ class TurtlebotDataHandler{
         ros::Subscriber lidar_;
         ros::Subscriber vel_;
         
-        //ros::Publisher odom_;
-
-        //Pose = [x, y, theta] (position, orientation)
-        //std::vector<double> PoseVector_;
         Eigen::Vector3d PoseVector_;
         Eigen::Matrix3d Covariance_;
 
@@ -33,8 +29,6 @@ class TurtlebotDataHandler{
 
     public:
         bool mapReceived_ = false;
-        bool laserReceived_ = false;
-        bool movementReceived_ = false;
 
         ros::Time time_;// = ros::Time::now();
         ros::Time newTime_;

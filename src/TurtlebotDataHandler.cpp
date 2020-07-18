@@ -5,7 +5,6 @@
 #define PI 3.14159265
 
 
-
 TurtlebotDataHandler::TurtlebotDataHandler(const ros::NodeHandle &nh, const ros::NodeHandle &nhLocal):nh_(nh), nhLocal_(nhLocal){
     this->init();
 }
@@ -40,15 +39,11 @@ void TurtlebotDataHandler::init(){
 }
 
 void TurtlebotDataHandler::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map){
-    //ROS_INFO("I received a map!");
     mapSaved_ = *map;
-    mapReceived_ = true;
 }
 
 void TurtlebotDataHandler::lidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan){
-    //ROS_INFO("I received a Lidar scan!");
     laserSaved_ = *scan;
-    laserReceived_ = true;
 }
 
 void TurtlebotDataHandler::velocityCallback(const geometry_msgs::Twist::ConstPtr& vel){
@@ -59,14 +54,6 @@ void TurtlebotDataHandler::velocityCallback(const geometry_msgs::Twist::ConstPtr
     }
     newTime_ = ros::Time::now();
     firstTime_ = false;
-
-
-    //TODO: Move this to EKF_prediction
-    double secs = newTime_.toSec() - time_.toSec();
-    
-    /*PoseVector_[2] += (velocity_[1] * secs);
-    PoseVector_[0] += (velocity_[0] * secs * cos(PoseVector_[2]));
-    PoseVector_[1] += (velocity_[0] * secs * sin(PoseVector_[2]));*/
 }
 
 
