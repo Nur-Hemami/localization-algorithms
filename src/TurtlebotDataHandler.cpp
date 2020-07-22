@@ -15,6 +15,8 @@ void TurtlebotDataHandler::init(){
     lidar_ = nh_.subscribe("scan", 1000, &TurtlebotDataHandler::lidarCallback, this);
     vel_ = nh_.subscribe("cmd_vel", 1000, &TurtlebotDataHandler::velocityCallback, this);
 
+    pose_ = nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("Turtlebot_pose_with_covariance", 1000);
+
     double tempx, tempy, temptheta;
 
     nhLocal_.getParam("intialPoseX", tempx);
@@ -40,6 +42,7 @@ void TurtlebotDataHandler::init(){
 
 void TurtlebotDataHandler::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map){
     mapSaved_ = *map;
+    mapReceived_ = true;
 }
 
 void TurtlebotDataHandler::lidarCallback(const sensor_msgs::LaserScan::ConstPtr& scan){
@@ -56,7 +59,6 @@ void TurtlebotDataHandler::velocityCallback(const geometry_msgs::Twist::ConstPtr
     firstTime_ = false;
 }
 
-
 Eigen::Vector3d TurtlebotDataHandler::getPose(){
     return PoseVector_;
 }
@@ -65,15 +67,37 @@ Eigen::Matrix3d TurtlebotDataHandler::getCovariance(){
     return Covariance_;
 }
 
-
-void TurtlebotDataHandler::setPose(Eigen::Vector3d mu_t){
+void TurtlebotDataHandler::setPosewithCovariance(Eigen::Vector3d mu_t, Eigen::Matrix3d sigma){
     PoseVector_ = mu_t;
-}
-
-void TurtlebotDataHandler::setCovariance(Eigen::Matrix3d sigma){
     Covariance_ = sigma;
-}
 
+    PosewithCovariance_.pose.pose.position.x = mu_t(0);
+    PosewithCovariance_.pose.pose.position.y = mu_t(1);
+    PosewithCovariance_.pose.pose.position.z = mu_t(2);
+
+    double roll = 0;
+    double pitch = 0;
+    double yaw = mu_t(2);
+
+    double cy = cos(yaw * 0.5);
+    double sy = sin(yaw * 0.5);
+    double cp = cos(pitch * 0.5);
+    double sp = sin(pitch * 0.5);
+    double cr = cos(roll * 0.5);
+    double sr = sin(roll * 0.5);
+
+    PosewithCovariance_.pose.pose.orientation.x = sr * cp * cy - cr * sp * sy;
+    PosewithCovariance_.pose.pose.orientation.y = cr * sp * cy + sr * cp * sy;
+    PosewithCovariance_.pose.pose.orientation.z = cr * cp * sy - sr * sp * cy;
+    PosewithCovariance_.pose.pose.orientation.w = cr * cp * cy + sr * sp * sy;
+    
+    //pose.covariance missing, empty for now
+    /*
+    PosewithCovariance_.pose.covariance = []
+    */
+
+    pose_.publish(PosewithCovariance_);
+}
 
 nav_msgs::OccupancyGrid TurtlebotDataHandler::getMap(){
     return mapSaved_;

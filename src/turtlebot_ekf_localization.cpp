@@ -66,8 +66,7 @@ void EKF_predition(TurtlebotDataHandler* dataForEKF){
     
     Eigen::Matrix3d sigma_t = (G_t * sigma * G_t.transpose()) + (V_t * M_t * V_t.transpose());
 
-    dataForEKF->setPose(mu_t);
-    dataForEKF->setCovariance(sigma_t);
+    dataForEKF->setPosewithCovariance(mu_t, sigma_t);
 }
 
 
@@ -100,9 +99,7 @@ void EKF_correction(TurtlebotDataHandler* dataForEKF){
 
     Eigen::Matrix3d sigma_t;
 
-
-    dataForEKF->setPose(mu_t);
-    dataForEKF->setCovariance(sigma_t);
+    dataForEKF->setPosewithCovariance(mu_t, sigma_t);
 }
 
 int main(int argc, char **argv)

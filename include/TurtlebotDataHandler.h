@@ -3,6 +3,7 @@
 #include "sensor_msgs/LaserScan.h"
 #include "geometry_msgs/Twist.h"
 #include "nav_msgs/Odometry.h"
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
 #include "string.h"
 #include <vector>
 #include "Eigen/Dense"
@@ -16,9 +17,12 @@ class TurtlebotDataHandler{
         ros::Subscriber map_;
         ros::Subscriber lidar_;
         ros::Subscriber vel_;
+
+        ros::Publisher pose_;
         
         Eigen::Vector3d PoseVector_;
         Eigen::Matrix3d Covariance_;
+        geometry_msgs::PoseWithCovarianceStamped PosewithCovariance_;
 
         nav_msgs::OccupancyGrid mapSaved_;
         sensor_msgs::LaserScan laserSaved_;
@@ -30,7 +34,7 @@ class TurtlebotDataHandler{
     public:
         bool mapReceived_ = false;
 
-        ros::Time time_;// = ros::Time::now();
+        ros::Time time_; // = ros::Time::now();
         ros::Time newTime_;
 
 
@@ -48,9 +52,7 @@ class TurtlebotDataHandler{
 
         Eigen::Vector3d getPose();
 
-        void setPose(Eigen::Vector3d);
-
-        void setCovariance(Eigen::Matrix3d);
+        void setPosewithCovariance(Eigen::Vector3d, Eigen::Matrix3d);
    
         Eigen::Matrix3d getCovariance();
 
