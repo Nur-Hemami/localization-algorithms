@@ -1,6 +1,9 @@
 <launch>
     <include file="$(find turtlebot_ekf_localization)/launch/map_launcher.launch"></include>
 
+    <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="0 0 0 0 0 0 1 map odom 10" />
+
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find turtlebot_ekf_localization)/rviz/config_file.rviz" />
 
     <node name="turtlebot_ekf_localization_node" pkg="turtlebot_ekf_localization" type="turtlebot_ekf_localization" output="screen">
         <param name="intialPoseX" value="0.0"/>

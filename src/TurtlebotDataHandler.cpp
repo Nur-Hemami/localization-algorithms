@@ -38,6 +38,8 @@ void TurtlebotDataHandler::init(){
             covarianceTemp = covarianceTemp.substr(sz);
         }
     }
+
+    PosewithCovariance_.header.frame_id = "map";
 }
 
 void TurtlebotDataHandler::mapCallback(const nav_msgs::OccupancyGrid::ConstPtr& map){
@@ -71,9 +73,12 @@ void TurtlebotDataHandler::setPosewithCovariance(Eigen::Vector3d mu_t, Eigen::Ma
     PoseVector_ = mu_t;
     Covariance_ = sigma;
 
+    std::cout << "Sigma: /n" << Covariance_ << std::endl;
+    std::cout << "Mu: /n" << PoseVector_ << std::endl;
+
     PosewithCovariance_.pose.pose.position.x = mu_t(0);
     PosewithCovariance_.pose.pose.position.y = mu_t(1);
-    PosewithCovariance_.pose.pose.position.z = mu_t(2);
+    PosewithCovariance_.pose.pose.position.z = 0;
 
     double roll = 0;
     double pitch = 0;
@@ -91,10 +96,10 @@ void TurtlebotDataHandler::setPosewithCovariance(Eigen::Vector3d mu_t, Eigen::Ma
     PosewithCovariance_.pose.pose.orientation.z = cr * cp * sy - sr * sp * cy;
     PosewithCovariance_.pose.pose.orientation.w = cr * cp * cy + sr * sp * sy;
     
-    //pose.covariance missing, empty for now
-    /*
-    PosewithCovariance_.pose.covariance = []
-    */
+    //Publishing only this elements of the covariance matrix, rviz understands that we are in a 2D localization problem (x, y, yaw)
+    PosewithCovariance_.pose.covariance[0] = sigma(0);
+    PosewithCovariance_.pose.covariance[7] = sigma(1);
+    PosewithCovariance_.pose.covariance[35] = sigma(2);
 
     pose_.publish(PosewithCovariance_);
 }
